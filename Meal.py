@@ -1,11 +1,10 @@
-import csv
 from openpyxl import Workbook, load_workbook
 import calendar
 from datetime import datetime, timedelta, date
 
 
 class Meal:
-    def __init__(self, filec) -> None:
+    def __init__(self, filec: str) -> None:
         self.xl_file = filec
 
     def getDaysInMonth(self, year: int, month: int):
@@ -45,7 +44,7 @@ class Meal:
         # saving the sheet
         workbook.save(filename="mealdataxx.xlsx")
 
-    def readMeal(self, date: str, name: str = 'All') -> dict:
+    def readMeal(self, date: datetime, name: str = 'All') -> dict:
         """
         return meal of a specific date.
         Args:
@@ -67,6 +66,9 @@ class Meal:
             'Swadhin': 0
         }
 
+        # converting datetime -> str
+        date = date.strftime('%d-%m-%Y')
+
         # iterating the sheet for the specific date row
         date_row = 0
         for i in range(1, 32):
@@ -87,38 +89,51 @@ class Meal:
         else:
             return {name: all_meals[name]}
 
-    def writeAMeal(self, date: str, name: str, total_meal: int) -> None:
+    def writeAMeal(self, date: datetime, name: str, total_meal: str) -> None:
         """
         Write meal for a particular person
         Args:
-            date(DD-MM-YYYY)    : date of the meal
+            date(datetime object)    : date of the meal
             name    : meal holder name
+            total_meal : number of meals(meal can be 00, 11, 01, 10)
         Return:
             None
         """
-        wb = load_workbook(self.xl_file)
-        sheet1 = wb.active
+        # edit meal from current date to future dates. not previous dates
+        present_day = datetime.today().date()
+        if (date >= present_day):
+            wb = load_workbook(self.xl_file)
+            sheet1 = wb.active
+            # finding the row of date
+            date_row = date.day + 1
+            date = date.strftime("%d-%m-%Y") # converting datetime -> str
 
-        # finding the row of date
-        # iterating the sheet for the specific date row
-        date_row = 0
-        for i in range(1, 32):
-            cell = sheet1.cell(row=i, column=1)
-            if cell.value == date:
-                date_row = i
-        # finding the name culumn
-        name_col
-        for c in range (2, 10):
-            cell = sheet1.cell(row=1, column=c):
-            if cell.value == name:
-                name_col = c
+            # finding the name culumn
+            name_col = 0
+            for c in range (2, 10):
+                cell = sheet1.cell(row=1, column=c)
+                if cell.value == name:
+                    name_col = c
+                    break
+            # setting the meal
+            sheet1.cell(row=date_row, column=name_col).value = total_meal
+            wb.save(self.xl_file)
 
-        # setting the meal
-        sheet1.cell(row=date_row, column=name_col).value = total_meal
-        wb.save(self.xl_file)
-
-    # def writeAllMeal(self):
-    
-# x = Meal('mealdata.xlsx')
-# x.initializeSheet(sorted(
-#     ["Adil", "Elias", "Nurul", "Labib", "Prottus", "Pallob", "Nahid", "Swadhin"]))
+    def writeAllMeal(self, date: datetime, name: str, total_meal: str):
+        """
+        write all the meal from 'date' to last date of the into total_meal
+        Args:
+            date(datetime object)    : date of the meal
+            name    : meal holder name
+            total_meal : number of meals(meal can be 00, 11, 01, 10)
+        Return:
+            None
+        """
+        present_day = datetime.today().date()
+        #write meal only for today and next days. not previous days
+        if (date >= present_day):
+            total_days = self.getDaysInMonth(date.year, date.month)
+            print(total_days, date.day)
+            reminding_days = total_days - date.day
+            for i in range(reminding_days + 1):
+                self.writeAMeal(date + timedelta(i), name, total_meal)

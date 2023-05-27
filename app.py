@@ -2,7 +2,8 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.ext import CallbackQueryHandler
 from typing import Final
-from botdata import TOKEN, BOT_USERNAME
+from botdata import TOKEN, BOT_USERNAME # crete a file name botdata.py in the root folder and
+                                        # set TOKEN and BOT_USERNAME of the bot.
 
 # members
 allmembers = ['Adil', 'Elias', 'Labib', 'Nahid', 'Nurul', 'Pallob', 'Prottus', 'Swadhin']
