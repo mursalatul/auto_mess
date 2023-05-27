@@ -5,16 +5,16 @@ from datetime import datetime, timedelta, date
 
 class Meal:
     def __init__(self, filec: str) -> None:
-        self.xl_file = filec
+        self.xl_file = filec # targeted xlsx file, store meal data(date, meal of a person)
 
-    def getDaysInMonth(self, year: int, month: int):
+    async def getDaysInMonth(self, year: int, month: int):
         """
         return number of days in the following month of the year
         """
         last_day = calendar.monthrange(year, month)[1]
         return last_day
 
-    def initializeSheet(self, names: list):
+    async def initializeSheet(self, names: list):
         """
         this method will only called first day of the month to create and initialize the sheet.
         previous date will be removed as new sheet will be created
@@ -44,7 +44,7 @@ class Meal:
         # saving the sheet
         workbook.save(filename="mealdataxx.xlsx")
 
-    def readMeal(self, date: datetime, name: str = 'All') -> dict:
+    async def readMeal(self, date: datetime, name: str = 'All') -> dict:
         """
         return meal of a specific date.
         Args:
@@ -81,7 +81,7 @@ class Meal:
             cell = sheet1.cell(row=1, column=meal_number)
             cell_head = cell.value
             cell = sheet1.cell(row=date_row, column=meal_number)
-            all_meals[cell_head] = cell.value
+            all_meals[cell_head] = str(cell.value)
 
         # if no name provided, return all meal, else particular name meal
         if name == 'All':
@@ -89,7 +89,7 @@ class Meal:
         else:
             return {name: all_meals[name]}
 
-    def writeAMeal(self, date: datetime, name: str, total_meal: str) -> None:
+    async def writeAMeal(self, date: datetime, name: str, total_meal: str) -> None:
         """
         Write meal for a particular person
         Args:
@@ -116,10 +116,10 @@ class Meal:
                     name_col = c
                     break
             # setting the meal
-            sheet1.cell(row=date_row, column=name_col).value = total_meal
+            sheet1.cell(row=date_row, column=name_col).value = str(total_meal)
             wb.save(self.xl_file)
 
-    def writeAllMeal(self, date: datetime, name: str, total_meal: str):
+    async def writeAllMeal(self, date: datetime, name: str, total_meal: str):
         """
         write all the meal from 'date' to last date of the into total_meal
         Args:
@@ -132,8 +132,8 @@ class Meal:
         present_day = datetime.today().date()
         #write meal only for today and next days. not previous days
         if (date >= present_day):
-            total_days = self.getDaysInMonth(date.year, date.month)
+            total_days = await self.getDaysInMonth(date.year, date.month)
             print(total_days, date.day)
             reminding_days = total_days - date.day
             for i in range(reminding_days + 1):
-                self.writeAMeal(date + timedelta(i), name, total_meal)
+                await self.writeAMeal(date + timedelta(i), name, total_meal)
