@@ -1,11 +1,36 @@
 from openpyxl import Workbook, load_workbook
 import calendar
 from datetime import datetime, timedelta, date
+import os
+from pdfdocument import PDFDocument
+
+# variables
+XL_FILE_PATH = '/data'
 
 
 class Meal:
     def __init__(self, filec: str) -> None:
-        self.xl_file = filec # targeted xlsx file, store meal data(date, meal of a person)
+        # targeted xlsx file, store meal data(date, meal of a person)
+        self.xl_file = filec
+
+    async def __xl2pdf(self, date: datetime):
+        """
+        save the sheet as pdf
+        Args:
+            None
+        Return:
+            None
+        """
+        wb = load_workbook(self.xl_file)
+        sheet = wb.active
+
+        # creating the pdf
+        xlpdf = PDFDocument()
+        xlpdf.set_paper_size('A4')
+        xlpdf.add_page().draw_pdf(sheet)
+
+        # saving the pdf
+        xlpdf.save(f"Month{date.month}.pdf")
 
     async def getDaysInMonth(self, year: int, month: int):
         """
@@ -20,29 +45,37 @@ class Meal:
         previous date will be removed as new sheet will be created
         """
         # adding dates in the sheet creating date
-        present_day = datetime.now().strftime("%d-%m-%Y")
-        year = date.today().year
-        month = date.today().month
-        num_of_days_in_month = self.getDaysInMonth(year, month)
+        present_day = datetime.now()
 
-        # creating workbook and sheet
-        # workbook = load_workbook(self.xl_file)
-        workbook = Workbook()
-        sheet1 = workbook.active
+        # only initialize new sheet at the first day of the month
+        if present_day.day == 1:
+            # if there is already a xl_file in the directory then we have to save the previous sheet as pdf
+            for filename in os.listdir(XL_FILE_PATH):
+                if filename == self.xl_file:
+                    self.__xl2pdf(present_day - timedelta(1))
 
-        # adding dates in the 1st column
-        for i in range(0, num_of_days_in_month):
-            next_day = (datetime.now() + timedelta(days=i)
-                        ).strftime("%d-%m-%Y")
-            cell = sheet1.cell(row=i + 2, column=1)
-            cell.value = next_day
+            year = date.today().year
+            month = date.today().month
+            num_of_days_in_month = self.getDaysInMonth(year, month)
 
-        # adding names in the 1st row
-        for i, ele in enumerate(names):
-            cell = sheet1.cell(row=1, column=i + 2)
-            cell.value = ele
-        # saving the sheet
-        workbook.save(filename="mealdataxx.xlsx")
+            # creating workbook and sheet
+            # workbook = load_workbook(self.xl_file)
+            workbook = Workbook()
+            sheet1 = workbook.active
+
+            # adding dates in the 1st column
+            for i in range(0, num_of_days_in_month):
+                next_day = (datetime.now() + timedelta(days=i)
+                            ).strftime("%d-%m-%Y")
+                cell = sheet1.cell(row=i + 2, column=1)
+                cell.value = next_day
+
+            # adding names in the 1st row
+            for i, ele in enumerate(names):
+                cell = sheet1.cell(row=1, column=i + 2)
+                cell.value = ele
+            # saving the sheet
+            workbook.save(filename="mealdataxx.xlsx")
 
     async def readMeal(self, date: datetime, name: str = 'All') -> dict:
         """
@@ -67,24 +100,18 @@ class Meal:
         }
 
         # calculating date_row from inputed date
-        date_row = date.day - 1
+        date_row = date.day + 1
 
         # converting datetime -> str
         date = date.strftime('%d-%m-%Y')
 
-        # # iterating the sheet for the specific date row
-        # date_row = 0
-        # for i in range(1, 32):
-        #     cell = sheet1.cell(row=i, column=1)
-        #     if cell.value == date:
-        #         date_row = i
-
         # getting all the meals from that that row and saving in the dict
         for meal_number in range(2, 10):
             cell = sheet1.cell(row=1, column=meal_number)
-            cell_head = cell.value # cell_head represent the name belong to the cell
+            cell_head = cell.value  # cell_head represent the name belong to the cell
             cell = sheet1.cell(row=date_row, column=meal_number)
-            all_meals[cell_head] = str(cell.value) # assigning the meal info in the dict from xlsx file
+            # assigning the meal info in the dict from xlsx file
+            all_meals[cell_head] = str(cell.value)
 
         # if no name provided, return all meal, else particular name meal
         if name == 'All':
@@ -109,11 +136,11 @@ class Meal:
             sheet1 = wb.active
             # finding the row of date
             date_row = date.day + 1
-            date = date.strftime("%d-%m-%Y") # converting datetime -> str
+            date = date.strftime("%d-%m-%Y")  # converting datetime -> str
 
             # finding the name culumn
             name_col = 0
-            for c in range (2, 10):
+            for c in range(2, 10):
                 cell = sheet1.cell(row=1, column=c)
                 if cell.value == name:
                     name_col = c
@@ -133,7 +160,7 @@ class Meal:
             None
         """
         present_day = datetime.today().date()
-        #write meal only for today and next days. not previous days
+        # write meal only for today and next days. not previous days
         if (date >= present_day):
             total_days = await self.getDaysInMonth(date.year, date.month)
             reminding_days = total_days - date.day

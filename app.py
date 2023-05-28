@@ -150,14 +150,13 @@ async def todayallmeals_command(update: Update, context: ContextTypes.DEFAULT_TY
     '/todayallmeals
     show all meals for today
     """
-    todate = datetime.today().date() # for showing present date
+    todate = datetime.today().date().strftime('%d-%m-%Y') # for showing present date
     
     # reading data
     # Meal class handle all the meal related operations
     meal_read = Meal('mealdata copy.xlsx')
     # readMeal read meal info from xlsx file and return a dict of the data
     todays_all_meals = await meal_read.readMeal(datetime.today().date())
-    
     # print(todays_all_meals)
     todays_all_meals_str = "" # store all the user's present date meal info
     total_lunch = 0 # total lunch meal today
