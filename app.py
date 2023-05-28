@@ -13,6 +13,75 @@ from meal import Meal
 allmembers = ['Adil', 'Elias', 'Labib', 'Nahid', 'Nurul', 'Pallob', 'Prottus', 'Swadhin']
 
 # command functions
+async def setMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    set selected meal for a person for all dates
+    """
+    meal_sheet = Meal('mealdata copy.xlsx')
+    today_date = datetime.today().date()
+    user = await respondedUserInfo(update)
+
+    # taking clicked button
+    btn_meal = update.callback_query.data # -> 11 / 00 / 01 / 10
+    user_id = str(user['id']) # converting int id -> str id for handle prefix zero
+
+    # setting meal
+    if user_id == '5725269670': # adil
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[0],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[0], btn_meal)
+    
+    elif user_id == '1423361715': # elis
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[1],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[1], btn_meal)
+    
+    # elif user_id == 'id_of_every_chat': # labib
+    #     # if user click 11 or 00, set full month as 11 or 00
+    #     if btn_meal == '11' or btn_meal == '00':
+    #         await meal_sheet.writeAllMeal(today_date, allmembers[2],  btn_meal)
+    #     else:
+    #         await meal_sheet.writeAMeal(today_date, allmembers[2], btn_meal)
+
+    elif user_id == '1543687383': # nahid
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[3],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[3], btn_meal)
+    
+    elif user_id == '723226149': # nurul
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[4],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[4], btn_meal)
+    
+    elif user_id == '1946053289': # pallob
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[5],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[5], btn_meal)
+    
+    elif user_id == '5770910570': # prottus
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[6],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[6], btn_meal)
+    
+    elif user_id == '1669965957': # swadhin
+        # if user click 11 or 00, set full month as 11 or 00
+        if btn_meal == '11' or btn_meal == '00':
+            await meal_sheet.writeAllMeal(today_date, allmembers[7],  btn_meal)
+        else:
+            await meal_sheet.writeAMeal(today_date, allmembers[7], btn_meal)
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     '/start'
@@ -37,10 +106,10 @@ async def meal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     handle meals
     """
     # button creating
-    meal_button_11 = InlineKeyboardButton("1 1", callback_data='mbutton11')
-    meal_button_10 = InlineKeyboardButton("1 0", callback_data='mbutton10')
-    meal_button_01 = InlineKeyboardButton("0 1", callback_data='mbutton01')
-    meal_button_00 = InlineKeyboardButton("0 0", callback_data='mbutton00')
+    meal_button_11 = InlineKeyboardButton('1 1', callback_data='11')
+    meal_button_10 = InlineKeyboardButton('1 0', callback_data='10')
+    meal_button_01 = InlineKeyboardButton('0 1', callback_data='01')
+    meal_button_00 = InlineKeyboardButton('0 0', callback_data='00')
 
     # creating keyboard layout for the buttons. this way the buttons will appear
     keyboard_layout = [
@@ -62,18 +131,18 @@ async def manage_meal_button_clicks(update: Update, context: ContextTypes.DEFAUL
     button_clicked = query.data  # callback_data
 
     # handle indivitual button activity
-    if button_clicked == 'mbutton11':
+    if button_clicked == '11':
         await query.answer("Choosed Plan: Lunch(1) Dinner(1)")
-        await managerPallob(update, context)
-    if button_clicked == 'mbutton10':
+        await setMeal(update, context)
+    if button_clicked == '10':
         await query.answer("Choosed Plan: Lunch(1) Dinner(0)")
-        await managerPallob(update, context)
-    if button_clicked == 'mbutton01':
+        await setMeal(update, context)
+    if button_clicked == '01':
         await query.answer("Choosed Plan: Lunch(0) Dinner(1)")
-        await managerPallob(update, context)
-    if button_clicked == 'mbutton00':
+        await setMeal(update, context)
+    if button_clicked == '00':
         await query.answer("Choosed Plan: Lunch(0) Dinner(0)")
-        await managerPallob(update, context)
+        await setMeal(update, context)
 
 # run when /todayallmeals will be pressed
 async def todayallmeals_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -122,6 +191,25 @@ async def todayallmeals_command(update: Update, context: ContextTypes.DEFAULT_TY
 
 # async def 
 # inner functions
+
+async def respondedUserInfo(update: Update):
+    """
+    get responded user informations.
+    Args:
+        update (Update)
+    Return:
+        dict : username, id, firstname, lastname
+    """
+    user = update.effective_user # giving the access to the user who send the response
+    # organizing the user data
+    user_data = {
+        'username' : user.username,
+        'id' : user.id,
+        'firstname' : user.first_name,
+        'lastname' : user.last_name
+    }
+    return user_data
+
 async def managerPallob(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="This feature is still in developing phase. Contact Manager Pallob for manual setup")
 

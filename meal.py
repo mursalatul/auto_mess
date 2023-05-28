@@ -66,22 +66,25 @@ class Meal:
             'Swadhin': 0
         }
 
+        # calculating date_row from inputed date
+        date_row = date.day - 1
+
         # converting datetime -> str
         date = date.strftime('%d-%m-%Y')
 
-        # iterating the sheet for the specific date row
-        date_row = 0
-        for i in range(1, 32):
-            cell = sheet1.cell(row=i, column=1)
-            if cell.value == date:
-                date_row = i
+        # # iterating the sheet for the specific date row
+        # date_row = 0
+        # for i in range(1, 32):
+        #     cell = sheet1.cell(row=i, column=1)
+        #     if cell.value == date:
+        #         date_row = i
 
         # getting all the meals from that that row and saving in the dict
         for meal_number in range(2, 10):
             cell = sheet1.cell(row=1, column=meal_number)
-            cell_head = cell.value
+            cell_head = cell.value # cell_head represent the name belong to the cell
             cell = sheet1.cell(row=date_row, column=meal_number)
-            all_meals[cell_head] = str(cell.value)
+            all_meals[cell_head] = str(cell.value) # assigning the meal info in the dict from xlsx file
 
         # if no name provided, return all meal, else particular name meal
         if name == 'All':
@@ -133,7 +136,6 @@ class Meal:
         #write meal only for today and next days. not previous days
         if (date >= present_day):
             total_days = await self.getDaysInMonth(date.year, date.month)
-            print(total_days, date.day)
             reminding_days = total_days - date.day
             for i in range(reminding_days + 1):
                 await self.writeAMeal(date + timedelta(i), name, total_meal)
