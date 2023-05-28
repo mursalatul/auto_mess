@@ -130,19 +130,22 @@ async def manage_meal_button_clicks(update: Update, context: ContextTypes.DEFAUL
     clicked_by = query.from_user  # user
     button_clicked = query.data  # callback_data
 
+    # current date
+    present_date = datetime.today().date().strftime('%d-%m-%Y')
+
     # handle indivitual button activity
     if button_clicked == '11':
-        await query.answer("Choosed Plan: Lunch(1) Dinner(1)")
         await setMeal(update, context)
+        await printText(update, context, "Lunch(1) Dinner(1) are set for rest of the days in this month")
     if button_clicked == '10':
-        await query.answer("Choosed Plan: Lunch(1) Dinner(0)")
         await setMeal(update, context)
+        await printText(update, context, f"Lunch(1) Dinner(0) are set\nDate: {present_date}")
     if button_clicked == '01':
-        await query.answer("Choosed Plan: Lunch(0) Dinner(1)")
         await setMeal(update, context)
+        await printText(update, context, f"Lunch(0) Dinner(1) are set\nDate: {present_date}")
     if button_clicked == '00':
-        await query.answer("Choosed Plan: Lunch(0) Dinner(0)")
         await setMeal(update, context)
+        await printText(update, context, "Lunch(0) Dinner(0) are set for rest of the days in this month")
 
 # run when /todayallmeals will be pressed
 async def todayallmeals_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -209,8 +212,8 @@ async def respondedUserInfo(update: Update):
     }
     return user_data
 
-async def managerPallob(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="This feature is still in developing phase. Contact Manager Pallob for manual setup")
+async def printText(update: Update, context: ContextTypes.DEFAULT_TYPE, txt: str):
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=txt)
 
 
 # handle responses

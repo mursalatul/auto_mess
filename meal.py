@@ -2,7 +2,7 @@ from openpyxl import Workbook, load_workbook
 import calendar
 from datetime import datetime, timedelta, date
 import os
-from pdfdocument import PDFDocument
+from pdfdocument.document import PDFDocument
 
 # variables
 XL_FILE_PATH = '/data'
