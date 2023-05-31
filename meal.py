@@ -3,9 +3,8 @@ import calendar
 from datetime import datetime, timedelta, date
 import os
 from pdfdocument.document import PDFDocument
-
-# variables
-XL_FILE_PATH = '/data'
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from botdata import XL_FILE_PATH, SOLO_XL_FILE_PATH, SOLO_XL_FILE
 
 
 class Meal:
@@ -25,12 +24,21 @@ class Meal:
         sheet = wb.active
 
         # creating the pdf
-        xlpdf = PDFDocument()
-        xlpdf.set_paper_size('A4')
-        xlpdf.add_page().draw_pdf(sheet)
+        pdf_filename = f"{XL_FILE_PATH}/Month{date.month}.pdf"
 
-        # saving the pdf
-        xlpdf.save(f"Month{date.month}.pdf")
+        # Convert sheet data to a list of lists
+        data = []
+        for row in sheet.iter_rows(values_only=True):
+            data.append(row)
+
+        # Create the PDF document and add the table
+        doc = SimpleDocTemplate(pdf_filename)
+        table = Table(data)
+
+        # Build the PDF document
+        elements = [table]
+        doc.build(elements)
+
 
     async def getDaysInMonth(self, year: int, month: int):
         """
@@ -50,13 +58,14 @@ class Meal:
         # only initialize new sheet at the first day of the month
         if present_day.day == 1:
             # if there is already a xl_file in the directory then we have to save the previous sheet as pdf
-            for filename in os.listdir(XL_FILE_PATH):
-                if filename == self.xl_file:
-                    self.__xl2pdf(present_day - timedelta(1))
+            for filename in os.listdir(SOLO_XL_FILE_PATH): # 
+                if filename == SOLO_XL_FILE:
+                    await self.__xl2pdf(present_day - timedelta(1))
+                    break
 
             year = date.today().year
             month = date.today().month
-            num_of_days_in_month = self.getDaysInMonth(year, month)
+            num_of_days_in_month = await self.getDaysInMonth(year, month)
 
             # creating workbook and sheet
             # workbook = load_workbook(self.xl_file)
@@ -75,7 +84,7 @@ class Meal:
                 cell = sheet1.cell(row=1, column=i + 2)
                 cell.value = ele
             # saving the sheet
-            workbook.save(filename="mealdataxx.xlsx")
+            workbook.save(filename=self.xl_file)
 
     async def readMeal(self, date: datetime, name: str = 'All') -> dict:
         """

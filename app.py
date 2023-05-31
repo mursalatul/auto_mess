@@ -2,10 +2,10 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.ext import CallbackQueryHandler
 from typing import Final
-from botdata import TOKEN, BOT_USERNAME # crete a file name botdata.py in the root folder and
+from botdata import TOKEN, BOT_USERNAME, XL_FILE_PATH, XL_FILE # crete a file name botdata.py in the root folder and
                                         # set TOKEN and BOT_USERNAME of the bot.
-from datetime import datetime, timedelta
-
+from datetime import datetime, timedelta, time
+import schedule
 # user defined modules
 from meal import Meal
 
@@ -13,11 +13,33 @@ from meal import Meal
 allmembers = ['Adil', 'Elias', 'Labib', 'Nahid', 'Nurul', 'Pallob', 'Prottus', 'Swadhin']
 
 # command functions
+async def initializeMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Initialize meal sheet.
+    (ONLY WORKS AT FIRST DAY OF THE MONTH BETWEEN 12:01AM - 01:00AM)
+    """
+    current_time = datetime.now()
+    start_time = time(0, 1) # 12:01am
+    end_time = time(1, 0) # 01:00am
+    if (current_time.day == 1 and (start_time <= current_time.time() <= end_time)):
+        setup_meal = Meal(XL_FILE)
+        await setup_meal.initializeSheet(allmembers)
+        await update.message.reply_text("New sheet initialized. Enjoy!")
+    else:
+        await update.message.reply_text("For your kind info, this command is used to\
+                                        setup the whole month sheet, and generate a\
+                                        pdf of the record of previous month. Please\
+                                        use it between 12:01am - 01:00am at the first\
+                                        day of the month.\nContact:\
+                                        mursalatul.pallob@gmail.com\
+                                        for custom change.)")
+
 async def setMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     set selected meal for a person for all dates
     """
-    meal_sheet = Meal('mealdata copy.xlsx')
+    meal_sheet = Meal(XL_FILE)
+    await meal_sheet.initializeSheet(allmembers) # setting sheet for the first day
     today_date = datetime.today().date()
     user = await respondedUserInfo(update)
 
@@ -157,7 +179,7 @@ async def todayallmeals_command(update: Update, context: ContextTypes.DEFAULT_TY
     
     # reading data
     # Meal class handle all the meal related operations
-    meal_read = Meal('mealdata copy.xlsx')
+    meal_read = Meal(XL_FILE)
     # readMeal read meal info from xlsx file and return a dict of the data
     todays_all_meals = await meal_read.readMeal(datetime.today().date())
     # print(todays_all_meals)
@@ -255,6 +277,7 @@ if __name__ == '__main__':
 
     app.add_handler(CommandHandler('meal', meal_command))
     app.add_handler(CallbackQueryHandler(manage_meal_button_clicks))
+    app.add_handler(CommandHandler('rebootmeal', initializeMeal))
 
     app.add_handler(CommandHandler('todayallmeals', todayallmeals_command))
     # message
