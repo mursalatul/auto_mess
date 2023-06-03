@@ -1,4 +1,4 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, constants
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.ext import CallbackQueryHandler
 from typing import Final
@@ -6,13 +6,34 @@ from botdata import TOKEN, BOT_USERNAME, XL_FILE_PATH, XL_FILE # crete a file na
                                         # set TOKEN and BOT_USERNAME of the bot.
 from datetime import datetime, timedelta, time
 import schedule
+import pandas as pd
 # user defined modules
 from meal import Meal
+from botdata import XL_FILE
 
 # members
 allmembers = ['Adil', 'Elias', 'Labib', 'Nahid', 'Nurul', 'Pallob', 'Prottus', 'Swadhin']
 
 # command functions
+
+# command  = /showsheet
+async def showsheet(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Show this month's sheet
+    """
+    # Load the Excel file
+    try:
+        df = pd.read_excel(XL_FILE)
+    except Exception as e:
+        error_message = f"An error occurred while loading the file: {str(e)}"
+        await update.message.reply_text(error_message)
+        return
+    
+    # Convert the DataFrame to a formatted string
+    sheet_data = df.to_string(index=False)
+    
+    # Send the data as a message to the user
+    await update.message.reply_text(sheet_data, parse_mode=constants.ParseMode.HTML)
 
 # command = /rebootmeal
 async def initializeMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -288,6 +309,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('rebootmeal', initializeMeal))
 
     app.add_handler(CommandHandler('todayallmeals', todayallmeals_command))
+    app.add_handler(CommandHandler('showsheet', showsheet))
     # message
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
 
