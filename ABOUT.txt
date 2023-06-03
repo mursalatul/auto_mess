@@ -1,0 +1,6 @@
+available commands:
+    /meal               set meal
+    /members            show all the members
+    /todayallmeals      show today's meal statistics
+    /rebootmeal         setup meal sheet for the month
+    /showsheet          show full sheet

@@ -2,8 +2,7 @@ from openpyxl import Workbook, load_workbook
 import calendar
 from datetime import datetime, timedelta, date
 import os
-from pdfdocument.document import PDFDocument
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Table
 from botdata import XL_FILE_PATH, SOLO_XL_FILE_PATH, SOLO_XL_FILE
 
 

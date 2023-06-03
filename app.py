@@ -1,11 +1,9 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, constants
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.ext import CallbackQueryHandler
-from typing import Final
 from botdata import TOKEN, BOT_USERNAME, XL_FILE_PATH, XL_FILE # crete a file name botdata.py in the root folder and
                                         # set TOKEN and BOT_USERNAME of the bot.
-from datetime import datetime, timedelta, time
-import schedule
+from datetime import datetime, time
 import pandas as pd
 # user defined modules
 from meal import Meal
@@ -301,15 +299,15 @@ if __name__ == '__main__':
     app = Application.builder().token(TOKEN).build()
 
     # commands
-    app.add_handler(CommandHandler('start', start_command))
-    app.add_handler(CommandHandler('members', members_command))
+    app.add_handler(CommandHandler('start', start_command)) # start the bot
+    app.add_handler(CommandHandler('members', members_command)) # show all the members
 
-    app.add_handler(CommandHandler('meal', meal_command))
-    app.add_handler(CallbackQueryHandler(manage_meal_button_clicks))
-    app.add_handler(CommandHandler('rebootmeal', initializeMeal))
+    app.add_handler(CommandHandler('meal', meal_command)) # setup the indivitual meal
+    app.add_handler(CallbackQueryHandler(manage_meal_button_clicks)) # pock meal button
 
+    app.add_handler(CommandHandler('rebootmeal', initializeMeal)) # initialize meal(words on day 1, 12:01am - 01:00am)
     app.add_handler(CommandHandler('todayallmeals', todayallmeals_command))
-    app.add_handler(CommandHandler('showsheet', showsheet))
+    app.add_handler(CommandHandler('showsheet', showsheet)) # show full sheet
     # message
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
 
