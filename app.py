@@ -13,6 +13,8 @@ from meal import Meal
 allmembers = ['Adil', 'Elias', 'Labib', 'Nahid', 'Nurul', 'Pallob', 'Prottus', 'Swadhin']
 
 # command functions
+
+# command = /rebootmeal
 async def initializeMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Initialize meal sheet.
@@ -30,9 +32,8 @@ async def initializeMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                         setup the whole month sheet, and generate a\
                                         pdf of the record of previous month. Please\
                                         use it between 12:01am - 01:00am at the first\
-                                        day of the month.\nContact:\
-                                        mursalatul.pallob@gmail.com\
-                                        for custom change.)")
+                                        day of the month.\nContact: mursalatul.pallob@gmail.com\
+                                        (for custom change)")
 
 async def setMeal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -155,19 +156,26 @@ async def manage_meal_button_clicks(update: Update, context: ContextTypes.DEFAUL
     # current date
     present_date = datetime.today().date().strftime('%d-%m-%Y')
 
+    # current time
+    present_time = datetime.now()
     # handle indivitual button activity
-    if button_clicked == '11':
-        await setMeal(update, context)
-        await printText(update, context, "Lunch(1) Dinner(1) are set for rest of the days in this month")
-    if button_clicked == '10':
-        await setMeal(update, context)
-        await printText(update, context, f"Lunch(1) Dinner(0) are set\nDate: {present_date}")
-    if button_clicked == '01':
-        await setMeal(update, context)
-        await printText(update, context, f"Lunch(0) Dinner(1) are set\nDate: {present_date}")
-    if button_clicked == '00':
-        await setMeal(update, context)
-        await printText(update, context, "Lunch(0) Dinner(0) are set for rest of the days in this month")
+
+    # disable changing into 01 after 10am(morning) so that nobody can change it after the meal
+    if present_time.time().hour < 10:
+        if button_clicked == '11':
+            await setMeal(update, context)
+            await printText(update, context, "Lunch(1) Dinner(1) are set for rest of the days in this month")
+        if button_clicked == '10':
+            await setMeal(update, context)
+            await printText(update, context, f"Lunch(1) Dinner(0) are set\nDate: {present_date}")
+        if button_clicked == '01':
+            await setMeal(update, context)
+            await printText(update, context, f"Lunch(0) Dinner(1) are set\nDate: {present_date}")
+        if button_clicked == '00':
+            await setMeal(update, context)
+            await printText(update, context, "Lunch(0) Dinner(0) are set for rest of the days in this month")
+    else:
+        await printText(update, context, "Please update your meal between 12:01am - 09:59am. After that you cant edit your meal")
 
 # run when /todayallmeals will be pressed
 async def todayallmeals_command(update: Update, context: ContextTypes.DEFAULT_TYPE):

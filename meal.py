@@ -83,6 +83,10 @@ class Meal:
             for i, ele in enumerate(names):
                 cell = sheet1.cell(row=1, column=i + 2)
                 cell.value = ele
+
+            # in the beginning set all the members meal into 11 for rest of the days in the month
+            for nm in names:
+                await self.writeAllMeal(present_day, nm, '11')
             # saving the sheet
             workbook.save(filename=self.xl_file)
 
@@ -164,7 +168,7 @@ class Meal:
         Args:
             date(datetime object)    : date of the meal
             name    : meal holder name
-            total_meal : number of meals(meal can be 00, 11, 01, 10)
+            total_meal : number of meals(meal can be '00', '11', '01', '10')
         Return:
             None
         """
